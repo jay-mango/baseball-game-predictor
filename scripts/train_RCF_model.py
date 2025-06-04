@@ -10,7 +10,7 @@ df1 = pd.read_csv('blue_jays_games_data.csv')
 df1['Result'] = df1['Result'].map({'W': 1, 'L': 0})
 
 # Define features and target
-X = df1[["OPS", "WHIP"]]
+X = df1[["OPS", "WHIP", "opp_OPS", "opp_WHIP"]]
 y = df1["Result"]
 
 # Train/test split
@@ -23,7 +23,7 @@ param_grid = {
     'min_samples_split': [2, 4],
     'min_samples_leaf': [1, 2],
     'max_features': ['sqrt', 'log2'],
-    'class_weight': [None, 'balanced']
+    'class_weight': ['balanced']
 }
 
 # Initialize Grid Search
