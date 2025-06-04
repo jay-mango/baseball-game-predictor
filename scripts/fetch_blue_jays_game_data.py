@@ -47,7 +47,6 @@ def extract_stats(driver, row_dict):
         bj_pitch_table_id = "WinsBox1_dg3ap_ctl00"
         row_dict = get_game_date(stat_name, index, row_dict, bj_pitch_table_id)
 
-
     except Exception as e:
         print(f"❌ Error during stat extraction: {e}")
 
@@ -66,7 +65,6 @@ def click_on_box_score(driver, url, row_dict):
     except Exception as e:
         print(f"❌ Failed to load box score page: {e}")
 
-    # 👉 Do scraping here...
     extract_stats(driver, row_dict)
 
     driver.close()
@@ -88,7 +86,7 @@ def visit_schedule_page(driver):
     return rows
 
 # Main Script
-print("📅 Fetching BlueJays schedule data...")
+print("Fetching BlueJays schedule data...")
 # Set up Selenium driver
 options = webdriver.ChromeOptions()
 options.add_argument("--headless")  # Run in headless mode for faster execution, but you can comment this out if you want to see the browser
@@ -126,8 +124,6 @@ for index, row in enumerate(rows):
             link_element = cols[0].find_element(By.TAG_NAME, "a")
             box_score_url = link_element.get_attribute("href")
             click_on_box_score(driver, box_score_url, row_data)
-            if index == 5:
-                break  # For testing, remove this line to scrape all games
         except Exception as e:
             print(f"⚠️ Error reading row {index + 1}: {e}")
 
@@ -138,4 +134,4 @@ df.to_csv('blue_jays_games_data.csv', index=False)
 
 # Clean up
 driver.quit()
-print("✅ Done! Browser closed.")
+print("Done. Data saved to 'blue_jays_games_data.csv'.")
