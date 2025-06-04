@@ -8,36 +8,35 @@ import time
 import pandas as pd
 
 # Functions
+
+def get_game_date(stat_name, index, row_dict, table_id):
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, table_id))
+    )
+    table_hit = driver.find_element(By.ID, table_id)
+    rows_hit = table_hit.find_elements(By.TAG_NAME, "tr")
+
+    last_row = rows_hit[-1]  # Get the last row which contains the totals
+    cols = last_row.find_elements(By.TAG_NAME, "td")
+    if cols:
+        row_dict[stat_name] = cols[index].text.strip()  # OPS column
+    return row_dict
+
 def extract_stats(driver, row_dict):
     try:
         # Part 1: OPS from Blue Jays - Advanced
+        stat_name = "OPS"
+        index = 7  # OPS column index in the last row
+        bj_hit_table_id = "WinsBox1_dg3hb_ctl00"
 
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "WinsBox1_dg3hb_ctl00"))
-        )
-        table_hit = driver.find_element(By.ID, "WinsBox1_dg3hb_ctl00")
-        rows_hit = table_hit.find_elements(By.TAG_NAME, "tr")
-
-        for row in rows_hit:
-            cols = row.find_elements(By.TAG_NAME, "td")
-            if cols and cols[0].text.strip() == "Total":
-                row_dict["OPS"] = cols[7].text.strip()  # OPS column
-                break
+        row_dict = get_game_date(stat_name, index, row_dict, bj_hit_table_id)
+        
 
         # Part 2: WHIP and ERA- from Pitching table
-
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "WinsBox1_dg3hp_ctl00"))
-        )
-        table_pitch = driver.find_element(By.ID, "WinsBox1_dg3hp_ctl00")
-        rows_pitch = table_pitch.find_elements(By.TAG_NAME, "tr")
-
-        for row in rows_pitch:
-            cols = row.find_elements(By.TAG_NAME, "td")
-            if cols and cols[0].text.strip() == "Total":
-                row_dict["WHIP"] = cols[9].text.strip()    # WHIP
-                row_dict["ERA-"] = cols[12].text.strip()   # ERA-
-                break
+        stat_name = "WHIP"
+        index = 9  # WHIP column index in the last row
+        bj_pitch_table_id = "WinsBox1_dg3hp_ctl00"
+        row_dict = get_game_date(stat_name, index, row_dict, bj_hit_table_id)
 
     except Exception as e:
         print(f"❌ Error during stat extraction: {e}")
@@ -79,7 +78,7 @@ def visit_schedule_page(driver):
     return rows
 
 # Main Script
-print("📅 Fetching Phillies schedule data...")
+print("📅 Fetching BlueJays schedule data...")
 # Set up Selenium driver
 options = webdriver.ChromeOptions()
 options.add_argument("--headless")  # Run in headless mode for faster execution, but you can comment this out if you want to see the browser
@@ -108,7 +107,6 @@ for index, row in enumerate(rows):
                 "Result": cols[4].text,
                 "OPS": None,
                 "WHIP": None,
-                "ERA-": None
             }
             tor_games.append(row_data)
             
