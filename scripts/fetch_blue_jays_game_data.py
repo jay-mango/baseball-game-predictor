@@ -10,6 +10,7 @@ import pandas as pd
 # Functions
 
 def get_game_date(stat_name, index, row_dict, table_id):
+
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.ID, table_id))
     )
@@ -28,15 +29,24 @@ def extract_stats(driver, row_dict):
         stat_name = "OPS"
         index = 7  # OPS column index in the last row
         bj_hit_table_id = "WinsBox1_dg3hb_ctl00"
-
         row_dict = get_game_date(stat_name, index, row_dict, bj_hit_table_id)
         
+        # Part 2: OPS from Opponent - Advanced
+        stat_name = "opp_OPS"
+        opp_hit_table_id = "WinsBox1_dg3ab_ctl00"
+        row_dict = get_game_date(stat_name, index, row_dict, opp_hit_table_id)
 
-        # Part 2: WHIP and ERA- from Pitching table
+        # Part 3: WHIP from Pitching table - Blue Jays
         stat_name = "WHIP"
         index = 9  # WHIP column index in the last row
         bj_pitch_table_id = "WinsBox1_dg3hp_ctl00"
-        row_dict = get_game_date(stat_name, index, row_dict, bj_hit_table_id)
+        row_dict = get_game_date(stat_name, index, row_dict, bj_pitch_table_id)
+
+        # Part 4: WHIP from Pitching table - Opponent
+        stat_name = "opp_WHIP"
+        bj_pitch_table_id = "WinsBox1_dg3ap_ctl00"
+        row_dict = get_game_date(stat_name, index, row_dict, bj_pitch_table_id)
+
 
     except Exception as e:
         print(f"❌ Error during stat extraction: {e}")
@@ -107,6 +117,8 @@ for index, row in enumerate(rows):
                 "Result": cols[4].text,
                 "OPS": None,
                 "WHIP": None,
+                "opp_OPS": None,
+                "opp_WHIP": None,
             }
             tor_games.append(row_data)
             
@@ -114,7 +126,8 @@ for index, row in enumerate(rows):
             link_element = cols[0].find_element(By.TAG_NAME, "a")
             box_score_url = link_element.get_attribute("href")
             click_on_box_score(driver, box_score_url, row_data)
-
+            if index == 5:
+                break  # For testing, remove this line to scrape all games
         except Exception as e:
             print(f"⚠️ Error reading row {index + 1}: {e}")
 
